@@ -9,9 +9,9 @@ let imageWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({width: 900, height: 680, webPreferences: { webSecurity: false}})
     //mainWindow.setMenuBarVisibility(false);
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
 
-    imageWindow = new BrowserWindow({width: 600, height: 600, parent: mainWindow, show: false})
+    imageWindow = new BrowserWindow({width: 600, height: 600, resizable: false, parent: mainWindow, show: false})
 
     mainWindow.loadURL(
         isDev ? 'http://localhost:3000' :
@@ -55,6 +55,9 @@ app.on('activate', ()=> {
     }
 });
 
+app.on('browser-window-created', (event, window)=> {
+  window.setMenuBarVisibility(false);
+});
 
 ipcMain.on("toggle-image", (event, arg) => {
     imageWindow.show();
