@@ -5,6 +5,7 @@ const isDev = require('electron-is-dev')
 
 let mainWindow;
 let imageWindow;
+let settingsWindow;
 
 function createWindow() {
     mainWindow = new BrowserWindow({width: 900, height: 680, webPreferences: { webSecurity: false}})
@@ -12,6 +13,7 @@ function createWindow() {
     //mainWindow.webContents.openDevTools();
 
     imageWindow = new BrowserWindow({width: 600, height: 600, resizable: false, parent: mainWindow, show: false})
+    settingsWindow = new BrowserWindow({width: 600, height: 600, resizable: false, parent: mainWindow, show: false})
 
     mainWindow.loadURL(
         isDev ? 'http://localhost:3000' :
@@ -31,11 +33,25 @@ function createWindow() {
         })
     );
 
+    settingsWindow.loadURL(
+        isDev ? 'http://localhost:3000/settings' :
+        url.format({
+            pathname: path.join(__dirname, '../build/index.html'),
+            protocol: 'file:',
+            slashes: true
+        })
+    );
+
     mainWindow.on('closed', () => mainWindow = null);
 
     imageWindow.on('close', (event) => {
         event.preventDefault();
         imageWindow.hide();
+    });
+
+    settingsWindow.on('close', (event) => {
+        event.preventDefault();
+        settingsWindow.hide();
     });
 }
 
@@ -55,11 +71,16 @@ app.on('activate', ()=> {
     }
 });
 
+//Esconde o menu globalmente
 app.on('browser-window-created', (event, window)=> {
-  window.setMenuBarVisibility(false);
+  //window.setMenuBarVisibility(false);
 });
 
 ipcMain.on("toggle-image", (event, arg) => {
     imageWindow.show();
     imageWindow.webContents.send('item', arg)
 });
+
+ipcMain.on("toggle-settings", () => {
+    settingsWindow.isVisible() ? settingsWindow.hide() : settingsWindow.show();
+}); 

@@ -5,6 +5,7 @@ import axios from 'axios';
 
 const electron = window.require('electron');
 const ipcRenderer = electron.ipcRenderer;
+const Menu = electron.remote.Menu;
 
 class App extends Component {
 
@@ -14,6 +15,8 @@ class App extends Component {
   }
 
   componentDidMount = () => {
+    this.initMenu();
+
     axios.get("https://api.jikan.moe/v3/top/anime")
       .then(response => {
         this.setState({
@@ -29,6 +32,38 @@ class App extends Component {
     ipcRenderer.send('toggle-image', imageUrl);
   }
 
+  initMenu = () => {
+    const menu = Menu.buildFromTemplate([
+      {
+        label: "File",
+        submenu: [
+          { label: "New Window" },
+          {
+            label: "Settings",
+            accelerator: "CmdOrCtrl+,",
+            click: () => {
+              ipcRenderer.send("toggle-settings");
+            }
+          },
+          { type: "separator" },
+          {
+            label: "Quit",
+            accelerator: "CmdOrCtrl+Q"
+          }
+        ]
+      },
+      {
+        label: "Edit",
+        submenu: [
+          { label: "Menu Item 1" },
+          { label: "Menu Item 2" },
+          { label: "Menu Item 3" }
+        ]
+      }
+    ]);
+    Menu.setApplicationMenu(menu);
+  }
+
   render() {
     return (
       <div className="App">
@@ -38,7 +73,7 @@ class App extends Component {
               <li
                 key={post.mal_id}
                 className="list-group-item flex-container"
-                onClick={ () => this.showImage(post) }
+                onClick={() => this.showImage(post)}
               >
                 <img src={post.image_url} alt="thumb" className="thumbnail" />
                 <div>{post.title}</div>
